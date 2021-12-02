@@ -126,19 +126,33 @@ def julebuk(
     # goat = goat + horn
     return goat
 
-'''
-def star(num_points=5, outer_rad=3, dip_factor=0.5) -> List[Point3]:
-    star_pts = []
-    for i in range(2 * num_points):
-        rad = outer_rad - i % 2 * dip_factor * outer_rad
-        angle = radians(360 / (2 * num_points) * i)
-        star_pts.append(Point3(rad * np.cos(angle), rad * np.sin(angle), 0))
-    return star_pts
+def mechanism():
+    neck = sd.cylinder(d=12, h=2, center=True)
+    neck = sd.hull()(neck, sd.translate([40,0,0])(neck))
+    neck -= sd.cylinder(d=8, h=3, center=True)
 
-'''
+    body = sd.cylinder(d=12, h=7, center=True)
+    body = sd.hull()(body, sd.translate([-40,0,0])(body))
+    body -= sd.cylinder(d=5, h=8, center=True)
+    body -= sd.cube([13,13,3],center=True)
+    body += sd.cylinder(d=7, h=7, center=True)
+    body -= sd.cylinder(d=5, h=8, center=True)
+
+    axel = sd.cylinder(d=4,h=10,center=True)
+
+    leg = sd.cylinder(d=12, h=4, center=True)
+    leg = sd.hull()(leg, sd.translate([20,0,0])(leg))
+    legs = union()(
+            sd.translate([0,0,7])(leg),
+            sd.translate([0,0,-7])(leg),
+            axel,
+            )
+    final = neck+body+legs
+    final = sd.rotate([90,0,0])(final)
+    return final
 
 if __name__ == '__main__':
     args = parseArguments()
     parameters = vars(args)  # Makes a dictionary from argument keywords
-    final = julebuk(**parameters)
+    final = mechanism()
     print(scad_render(final, file_header=f'$fn={args.fn};'))
