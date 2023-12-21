@@ -55,7 +55,7 @@ def kochBarrel(diameter=50, iterations=3, levels=100):
                    )
 
 
-def twistTree(level_h = 30, diameter=50, num_iter=3):
+def twistTree(level_h = 30, diameter=50, num_iter=4):
     flake=kochSnowflake(diameter=diameter, iterations=num_iter)
     flake2=kochSnowflake(diameter=diameter*3**-.5, iterations=num_iter)
     flake2 = sd.rotate(30)(flake2)
@@ -82,28 +82,39 @@ def twistTree(level_h = 30, diameter=50, num_iter=3):
     piece = sd.translate([0,0,diameter*(1/3+1/3**1.5+1/3**2+1/3**2.5)])(piece)
     block += piece
     block = sd.scale([1,1,1.5])(block)
+    block = sd.scale(2)(block)
     return block
 
-    # second layer
-    piece = sd.linear_extrude(height=diameter/3**1.5, scale=1/3, center=False)(flake2)
-    piece = sd.translate([0,0,diameter/3])(piece)
+def twistTree2(level_h = 30, diameter=50, num_iter=3):
+    flake=kochSnowflake(diameter=diameter, iterations=num_iter)
+    flake2=kochSnowflake(diameter=diameter*3**-.5, iterations=num_iter)
+    flake2 = sd.rotate(30)(flake2)
+    delta = 1-3**-.5
+    piece = sd.linear_extrude(height=diameter/3, scale=1/3, twist=60)(flake)
+    block = piece
+    piece = sd.linear_extrude(height=diameter/3, scale=1, twist=-30)(flake2)
+    # piece = sd.translate([0,0,-1])(piece)
+    # piece = sd.linear_extrude(height=3**.5*delta*diameter, scale=1/(1-delta)-1, center=False)(flake2)
     block += piece
-    flake = sd.scale(1/3)(flake)
-    piece = sd.linear_extrude(height=diameter/3**1.5, scale=1, center=False)(flake)
-    piece = sd.translate([0,0,diameter/3])(piece)
+    # Repeat
+    piece = sd.scale(1/3**.5)(block)
+    # piece = sd.rotate([0,0,15])(piece)
+    piece = sd.translate([0,0,diameter*(1/3)])(piece)
     block += piece
-
     # Repeat
     piece = sd.scale(1/3)(block)
+    # piece = sd.rotate([0,0,30])(piece)
     piece = sd.translate([0,0,diameter*(1/3+1/3**1.5)])(piece)
     block += piece
- 
     # Repeat
     piece = sd.scale(1/9)(block)
+    # piece = sd.rotate([0,0,30])(piece)
     piece = sd.translate([0,0,diameter*(1/3+1/3**1.5+1/3**2+1/3**2.5)])(piece)
     block += piece
-
+    block = sd.scale([1,1,1.5])(block)
+    block = sd.scale(2)(block)
     return block
+
 
 def straightTree(level_h = 30, diameter=50, num_iter=3):
     flake=kochSnowflake(diameter=diameter, iterations=num_iter)
@@ -145,12 +156,13 @@ def straightTree(level_h = 30, diameter=50, num_iter=3):
     return block
 
 if __name__ == '__main__':
-    out_dir = sys.argv[1] if len(sys.argv) > 1 else os.curdir
-    file_out = os.path.join(out_dir, 'path_extrude_example.scad')
-
     # block = straightTree()
-    block = twistTree()
-    print(scad_render(block))
+    final = twistTree()
+    # final = twistTree2()
+
+    fn=256
+    print(scad_render(final, file_header=f'$fn={fn};'))
+
     # print("%(__file__)s: SCAD file written to: \n%(file_out)s" % vars())
     # scad_render_to_file(a, file_out, include_orig_code=True)
 
